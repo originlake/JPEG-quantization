@@ -1,12 +1,14 @@
-function [A,len]=jpegprocess(quality,I)
-M=rgb2ycbcr(I);            %RGB转换为YCbCr
+function [A,len]=jpegcompress(quality,I)
+%Apply JPEG compression algorithm from beginning to huffman encoding
+%!!not fully implemented
+M=rgb2ycbcr(I);            %RGB to YCbCr
 M=double(M);
 Y=M(:,:,1)-128;
 U=M(:,:,2)-128;
 V=M(:,:,3)-128;
 
 D=dctmtx(8);
-BY=blkproc(Y,[8,8],'P1*x*P2',D,D');     %分块并进行DCT变换
+BY=blkproc(Y,[8,8],'P1*x*P2',D,D');     %block and apply DCT
 BU=blkproc(U,[8,8],'P1*x*P2',D,D');
 BV=blkproc(V,[8,8],'P1*x*P2',D,D');
 
@@ -25,7 +27,7 @@ a=[16,11,10,16,24,40,51,61;
    18,22,37,56,68,109,103,77;
    24,35,55,64,81,104,113,92;
    49,64,78,87,103,121,120,101;
-   72,92,95,98,112,100,103,99];  %JPEG亮度量化表
+   72,92,95,98,112,100,103,99];  %JPEG luminance quantization table
 b=[17,18,24,47,99,99,99,99;
     18,21,26,66,99,99,99,99;
     24,26,56,99,99,99,99,99;
@@ -33,11 +35,11 @@ b=[17,18,24,47,99,99,99,99;
     99,99,99,99,99,99,99,99;
     99,99,99,99,99,99,99,99;
     99,99,99,99,99,99,99,99;
-    99,99,99,99,99,99,99,99];   %JPEG色度量化表
+    99,99,99,99,99,99,99,99];   %JPEG chrominance quantization table
 
 BY=blkproc(BY,[8,8],'round(x./P1)',a);
 BU=blkproc(BU,[8,8],'round(x./P1)',b);
-BV=blkproc(BV,[8,8],'round(x./P1)',b);       %量化,压缩部分的工作完成
+BV=blkproc(BV,[8,8],'round(x./P1)',b);       %quantization
 
 A=encode(BY);
 
